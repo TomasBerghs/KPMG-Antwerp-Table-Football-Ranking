@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Football Player Ranking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #cccccc;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Table Football Player Ranking</h1>
+    <div id="addMatchForm">
+        <input type="text" id="team1Player1Name" placeholder="Team 1 Player 1 Name">
+        <input type="text" id="team1Player2Name" placeholder="Team 1 Player 2 Name">
+        <input type="number" id="team1Score" placeholder="Team 1 Score">
+        <span>vs</span>
+        <input type="number" id="team2Score" placeholder="Team 2 Score">
+        <input type="text" id="team2Player1Name" placeholder="Team 2 Player 1 Name">
+        <input type="text" id="team2Player2Name" placeholder="Team 2 Player 2 Name">
+        <button onclick="addMatch()">Add Match Result</button>
+    </div>
+    <table id="rankingTable">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Player Name</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody id="rankingBody">
+            <!-- Ranking data will be inserted here dynamically -->
+        </tbody>
+    </table>
+
+    <script>
+        let players = {};
+
+        function addMatch() {
+            const team1Player1Name = document.getElementById('team1Player1Name').value.trim();
+            const team1Player2Name = document.getElementById('team1Player2Name').value.trim();
+            const team2Player1Name = document.getElementById('team2Player1Name').value.trim();
+            const team2Player2Name = document.getElementById('team2Player2Name').value.trim();
+            const team1Score = parseInt(document.getElementById('team1Score').value);
+            const team2Score = parseInt(document.getElementById('team2Score').value);
+
+            if (!team1Player1Name || !team1Player2Name || !team2Player1Name || !team2Player2Name || isNaN(team1Score) || isNaN(team2Score)) {
+                alert('Please enter valid player names and scores.');
+                return;
+            }
+
+            const team1Players = [team1Player1Name, team1Player2Name];
+            const team2Players = [team2Player1Name, team2Player2Name];
+
+            const team1AverageScore = (team1Score + team2Score) / 2;
+            const team2AverageScore = (team1Score + team2Score) / 2;
+
+            const team1ExpectedScore = 1 / (1 + Math.pow(10, (calculateRatingDifference(team1Players) / 400)));
+            const team2ExpectedScore = 1 / (1 + Math.pow(10, (calculateRatingDifference(team2Players) / 400)));
+
+            const team1Points = calculatePoints(team1Score, team1ExpectedScore);
+            const team2Points = calculatePoints(team2Score, team2ExpectedScore);
+
+            team1Players.forEach(player => {
+                if (!players[player]) {
+                    players[player] = { points: 1000 }; // Initial rating
+                }
+                players[player].points += team1Points;
+            });
+
+            team2Players.forEach(player => {
+                if (!players[player]) {
+                    players[player] = { points: 1000 }; // Initial rating
+                }
+                players[player].points += team2Points;
+            });
+
+            updateRanking();
+            clearInputs();
+        }
+
+        function calculateRatingDifference(players) {
+            const ratings = players.map(player => players[player] ? players[player].points : 1000); // Default initial rating to 1000
+            return Math.max(...ratings) - Math.min(...ratings);
+        }
+
+        function calculatePoints(score, expectedScore) {
+            const K = 20; // Scoring coefficient
+            return K * (score - expectedScore);
+        }
+
+        function clearInputs() {
+            document.getElementById('team1Player1Name').value = '';
+            document.getElementById('team1Player2Name').value = '';
+            document.getElementById('team2Player1Name').value = '';
+            document.getElementById('team2Player2Name').value = '';
+            document.getElementById('team1Score').value = '';
+            document.getElementById('team2Score').value = '';
+        }
+
+        function updateRanking() {
+            const rankingBody = document.getElementById('rankingBody');
+            rankingBody.innerHTML = '';
+
+            // Sort players by points
+            const sortedPlayers = Object.keys(players).sort((a, b) => players[b].points - players[a].points);
+
+            sortedPlayers.forEach((player, index) => {
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${player}</td>
+                        <td>${Math.round(players[player].points)}</td>
+                    </tr>
+                `;
+                rankingBody.innerHTML += row;
+            });
+        }
+
+        // Initial rendering
+        updateRanking();
+    </script>
+</body>
+</html>
