@@ -101,21 +101,31 @@
 
             team1Players.forEach(player => {
                 if (!players[player]) {
-                    players[player] = { points: 1000 }; // Initial rating
+                    players[player] = { matchesPlayed: 0, wins: 0, points: 1000 }; // Initial rating
                 }
+                players[player].matchesPlayed++;
+                if (team1Score > team2Score) {
+                    players[player].wins++;
                 players[player].points += team1Points;
             });
 
             team2Players.forEach(player => {
                 if (!players[player]) {
-                    players[player] = { points: 1000 }; // Initial rating
+                    players[player] = { matchesPlayed: 0, wins: 0, points: 1000 }; // Initial rating
                 }
+                players[player].matchesPlayed++;
+                if (team2Score > team1Score) {
+                    players[player].wins++;
                 players[player].points += team2Points;
             });
 
             updateRanking();
             clearInputs();
         }
+
+        function calculateWinPercentage(wins, matchesPlayed) {
+            return matchesPlayed > 0 ? ((wins / matchesPlayed) * 100).toFixed(2) : 0;
+        }  
 
         function calculateRatingDifference(players) {
             const ratings = players.map(player => players[player] ? players[player].points : 1000); // Default initial rating to 1000
