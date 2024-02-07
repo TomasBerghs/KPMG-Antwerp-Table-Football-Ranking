@@ -126,6 +126,11 @@
             const K = 20; // Scoring coefficient
             return K * (score - expectedScore);
         }
+        
+         function calculateWinPercentage(wins, matchesPlayed) {
+            return matchesPlayed > 0 ? ((wins / matchesPlayed) * 100).toFixed(2) : 0;
+        }
+
 
         function clearInputs() {
             document.getElementById('team1Player1Name').value = '';
@@ -144,10 +149,14 @@
             const sortedPlayers = Object.keys(players).sort((a, b) => players[b].points - players[a].points);
 
             sortedPlayers.forEach((player, index) => {
+                const winPercentage = calculateWinPercentage(players[player].wins, players[player].matchesPlayed);
                 const row = `
                     <tr>
                         <td>${index + 1}</td>
                         <td>${player}</td>
+                        <td>${players[player].matchesPlayed}</td>
+                        <td>${players[player].wins}</td>
+                        <td>${winPercentage}%</td>
                         <td>${Math.round(players[player].points)}</td>
                     </tr>
                 `;
